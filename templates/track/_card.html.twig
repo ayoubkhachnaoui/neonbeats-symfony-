@@ -1,0 +1,53 @@
+<div class="track-item reveal-on-scroll group relative bg-white/[0.04] backdrop-blur-xl border border-white/[0.07] rounded-3xl overflow-hidden hover:border-cyan-500/40 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col"
+     data-title="{{ track.title|lower }}"
+     data-artist="{{ track.artist.artistName|lower }}"
+     data-genre="{{ track.category.name|default('') }}"
+     data-date="{{ track.releaseDate|date('U') }}"
+     data-plays="{{ track.playCount|default(0) }}">
+
+    {# Image area #}
+    <div class="relative aspect-square overflow-hidden">
+        {% if track.coverImage %}
+            <img src="{{ asset('uploads/images/' ~ track.coverImage) }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="{{ track.title }}">
+        {% else %}
+            <div class="w-full h-full bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center">
+                <i class="fas fa-music text-4xl text-gray-700"></i>
+            </div>
+        {% endif %}
+
+        {# Play Overlay #}
+        <a href="{{ path('app_track_play', {'id': track.id}) }}"
+           class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+            <div class="w-14 h-14 bg-gradient-to-tr from-cyan-500 to-fuchsia-600 rounded-full flex items-center justify-center text-white shadow-[0_0_30px_rgba(6,182,212,0.6)] hover:scale-110 transition-transform">
+                <i class="fas fa-play ml-1 text-lg"></i>
+            </div>
+        </a>
+
+        {# Genre badge #}
+        <div class="absolute top-3 left-3 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-xs text-gray-400">
+            {{ track.category.name|default('Music') }}
+        </div>
+    </div>
+
+    {# Info Area #}
+    <div class="p-4 flex-1 flex flex-col">
+        <h3 class="font-bold truncate text-base group-hover:text-cyan-400 transition-colors">{{ track.title }}</h3>
+        <p class="text-sm text-gray-500 truncate mt-0.5">{{ track.artist.artistName }}</p>
+        <div class="flex items-center justify-between mt-auto pt-3 text-xs text-gray-600">
+            <span><i class="fas fa-play mr-1"></i><span class="play-count-{{ track.id }}">{{ track.playCount }}</span></span>
+            <div class="flex items-center space-x-2">
+                {% if app.user %}
+                    <span class="text-gray-500 mr-1 like-count-{{ track.id }}">{{ track.likedBy|length }}</span>
+                    <button class="hover:text-red-500 transition-colors like-btn p-1" data-id="{{ track.id }}">
+                        <i class="{{ favoriteIds is defined and track.id in favoriteIds ? 'fas text-red-500' : 'far' }} fa-heart"></i>
+                    </button>
+                {% else %}
+                    <span class="text-gray-500 mr-1">{{ track.likedBy|length }}</span> <i class="far fa-heart p-1"></i>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# Bottom neon accent #}
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</div>

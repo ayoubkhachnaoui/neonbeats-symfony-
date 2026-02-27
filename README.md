@@ -110,68 +110,68 @@ sequenceDiagram
 
 ## 🤝 Project Realization & Team Split
 
-To modularize the development, the project has been divided into **3 Core Modules**, assigned to specific team members. Each module is further split into **2 logical commits** to organize the Git history.
+To modularize the development, the project has been divided into **3 Core Modules**, assigned based on technical domain. Each module is further split into **2 logical commits** to organize the Git history.
 
 ```mermaid
 graph TD
     Root[NeonBeats Project]
     
-    subgraph Ayoub [👤 Ayoub: Core Infrastructure & Logic]
-        A1[Commit 1: Setup & Data Layer]
-        A2[Commit 2: Advanced Features]
+    subgraph Ayoub [👤 Ayoub: Integration & Deep Tech]
+        A1[Commit 1: Logistics & Setup]
+        A2[Commit 2: JS, AI & 3D Dev]
     end
     
-    subgraph Rakia [👤 Rakia: Content & Interaction]
-        R1[Commit 3: Content Management]
-        R2[Commit 4: Personalization]
+    subgraph Farah [👤 Farah: Backend Development]
+        F1[Commit 3: Core Logic (src)]
+        F2[Commit 4: API & Security]
     end
     
-    subgraph Farah [👤 Farah: Design & Experience]
-        F1[Commit 5: UI/UX Foundation]
-        F2[Commit 6: Visual Polish]
+    subgraph Rakiya [👤 Rakiya: Frontend & Templating]
+        R1[Commit 5: HTML Structure]
+        R2[Commit 6: View Implementation]
     end
 
     Root --> Ayoub
-    Root --> Rakia
     Root --> Farah
+    Root --> Rakiya
 
-    A1 --> "Symfony Init, User Entity, Auth Security"
-    A2 --> "Voice Assistant JS, Admin Dashboard"
+    A1 --> "Project Init, Configuration, Integration Logistics"
+    A2 --> "JS Components, AI Voice API, Three.js 3D Engine"
     
-    R1 --> "Track/Category Entities, Upload Forms"
-    R2 --> "Playlist System, Favorites, Likes"
+    F1 --> "PHP Business Logic, Entities, Controllers (src/)"
+    F2 --> "Auth Security, Migrations, Backend Services"
     
-    F1 --> "Tailwind Config, Base Layouts, Homepage"
-    F2 --> "Three.js Background, Player UI, Animations"
+    R1 --> "Twig Templates, Base Layouts, Tailwind Integration"
+    R2 --> "Dashboard UI, Track List Templates, Admin Views"
 ```
 
 ### 📋 Detailed Commit Plan (for Git History)
 
 If you are reconstructing the history, follow this order:
 
-#### **👤 Part 1: Ayoub (The Architect)**
-*   **Commit 1: "Init Project core and Authentication"**
-    *   *Files:* `.env`, `docker-compose.yml`, `security.yaml`, `User.php`, `RegistrationController.php`, `LoginController.php`.
-    *   *Goal:* Get the server running and users logging in.
-*   **Commit 2: "Implement Voice Assistant and Admin Panel"**
-    *   *Files:* `assets/voice_control.js`, `AdminController.php`, `templates/admin/*`.
-    *   *Goal:* Add the "Brain" of the site and the control center.
+#### **👤 Part 1: Ayoub (The Integrator)**
+*   **Commit 1: "Project Foundation & Logistics"**
+    *   *Files:* `.env`, `composer.json`, `package.json`, `docker-compose.yml`, Integration configs.
+    *   *Goal:* Initialize the project, manage dependencies, and setup development logistics.
+*   **Commit 2: "Advanced Interactivity: JS, AI & 3D"**
+    *   *Files:* `assets/controllers/*`, `assets/three_bg.js`, `assets/voice_control.js`.
+    *   *Goal:* Build the "Deep Tech" components (Voice Recognition, 3D Graphics, JS logic).
 
-#### **👤 Part 2: Rakia (The Functional Logic)**
-*   **Commit 3: "Add Content Management (Tracks & Categories)"**
-    *   *Files:* `Track.php`, `Category.php`, `TrackController.php`, `templates/track/new.html.twig`.
-    *   *Goal:* Allow uploading music and organizing genres.
-*   **Commit 4: "Add User Interaction (Playlists & Favorites)"**
-    *   *Files:* `Playlist.php`, `PlaylistController.php`, `favorites.html.twig`.
-    *   *Goal:* Let users save music and create their own collections.
+#### **👤 Part 2: Farah (The Backend Architect)**
+*   **Commit 3: "Core Backend & Business Logic"**
+    *   *Files:* `src/Entity/*`, `src/Controller/*`, `src/Repository/*`.
+    *   *Goal:* Implement the core PHP functionality and database relationships in the `src` folder.
+*   **Commit 4: "Security & System Services"**
+    *   *Files:* `src/Security/*`, `config/packages/security.yaml`, Backend Mailers/Services.
+    *   *Goal:* Secure the application and implement complex backend workflows.
 
-#### **👤 Part 3: Farah (The Designer)**
-*   **Commit 5: "Setup UI Design System"**
-    *   *Files:* `tailwind.config.js`, `base.html.twig`, `home/index.html.twig`.
-    *   *Goal:* Define the look, feel, fonts, and responsive layout.
-*   **Commit 6: "Enhance Visuals & Player Experience"**
-    *   *Files:* `assets/three_bg.js`, `assets/controllers/audio_player_controller.js`, `discover.html.twig`.
-    *   *Goal:* Add the 3D particles, the glass player, and the smooth animations.
+#### **👤 Part 3: Rakiya (The Frontend Developer)**
+*   **Commit 5: "Frontend Structure & Templating"**
+    *   *Files:* `templates/base.html.twig`, `templates/partials/*`, `templates/home/*`.
+    *   *Goal:* Develop the HTML structure and responsive layouts using Twig.
+*   **Commit 6: "View Implementation & UI Refinement"**
+    *   *Files:* `templates/admin/*`, `templates/track/*`, `templates/playlist/*`.
+    *   *Goal:* Complete all functional views and finalize the user-facing HTML components.
 
 ---
 

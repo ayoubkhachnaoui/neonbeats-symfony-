@@ -1,0 +1,60 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    background-color: #000;
+    color: #fff;
+}
+
+/* ===== Scroll Reveal ===== */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.reveal-on-scroll.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== Button Micro-interactions ===== */
+button,
+a[class*="bg-"] {
+    transition-property: transform, box-shadow, background-color, border-color, color;
+    transition-duration: 150ms;
+}
+
+button:active:not(:disabled),
+a[class*="bg-"]:active {
+    transform: scale(0.96);
+}
+
+/* ===== Neon Glow Pulse (for active elements) ===== */
+@keyframes neonPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(6, 182, 212, 0.8), 0 0 50px rgba(6, 182, 212, 0.3);
+    }
+}
+
+.neon-pulse {
+    animation: neonPulse 2s ease-in-out infinite;
+}
+
+/* ===== Gradient Animated Border ===== */
+@keyframes borderRotate {
+    from {
+        --border-angle: 0deg;
+    }
+
+    to {
+        --border-angle: 360deg;
+    }
+}

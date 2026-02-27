@@ -1,0 +1,431 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}My Playlists — NeonBeats{% endblock %}
+
+{% block body %}
+{# ── Constellation Canvas ─────────────────────────────────────────── #}
+<canvas id="constellation-canvas" class="fixed inset-0 z-0 pointer-events-none opacity-40"></canvas>
+
+<div class="relative z-10 min-h-screen text-white pb-24">
+    <div class="max-w-7xl mx-auto px-6 py-12">
+
+        {# ── Header ─────────────────────────────────────────────────── #}
+        <div class="flex items-end justify-between mb-10">
+            <div>
+                <p class="text-xs font-semibold tracking-[0.3em] text-cyan-500 uppercase mb-2">Your Collection</p>
+                <h1 class="text-5xl font-bold font-['Outfit'] text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-fuchsia-500">
+                    My Playlists
+                </h1>
+            </div>
+            <button id="open-create-modal"
+                class="flex items-center space-x-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-cyan-500 to-fuchsia-600 text-white font-semibold text-sm shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_35px_rgba(6,182,212,0.6)] transition-all hover:scale-105 active:scale-95">
+                <i class="fas fa-plus"></i>
+                <span>New Playlist</span>
+            </button>
+        </div>
+
+        {# ── Flash Messages ──────────────────────────────────────────── #}
+        {% for msg in app.flashes('success') %}
+            <div class="mb-6 px-4 py-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm">
+                <i class="fas fa-check-circle mr-2"></i>{{ msg }}
+            </div>
+        {% endfor %}
+
+        {# ── Playlist Grid ───────────────────────────────────────────── #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+
+            {# Create New Card #}
+            <div id="create-card"
+                class="group relative bg-white/[0.03] border-2 border-dashed border-white/10 rounded-3xl p-6 flex flex-col items-center justify-center min-h-[220px] hover:border-cyan-500/60 hover:bg-cyan-500/5 transition-all cursor-pointer"
+                onclick="openCreateModal()">
+                <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4 group-hover:bg-cyan-500/20 group-hover:border-cyan-500/40 group-hover:scale-110 transition-all">
+                    <i class="fas fa-plus text-2xl text-gray-500 group-hover:text-cyan-400 transition-colors"></i>
+                </div>
+                <span class="font-semibold text-gray-500 group-hover:text-white transition-colors text-sm">Create New Playlist</span>
+                <span class="text-xs text-gray-600 mt-1">AI-assisted suggestions</span>
+            </div>
+
+            {# Existing Playlists #}
+            {% for playlist in playlists %}
+                <a href="{{ path('app_playlist_show', {'id': playlist.id}) }}"
+                   class="group relative bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-3xl overflow-hidden hover:border-fuchsia-500/40 hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(168,85,247,0.2)] transition-all duration-300 reveal-on-scroll">
+
+                    {# Cover Art #}
+                    <div class="aspect-square relative overflow-hidden">
+                        {% set gradients = [
+                            'from-cyan-600 to-blue-800',
+                            'from-fuchsia-600 to-purple-900',
+                            'from-violet-600 to-indigo-900',
+                            'from-pink-600 to-rose-900',
+                            'from-teal-600 to-cyan-900'
+                        ] %}
+                        {% set grad = random(gradients) %}
+                        <div class="w-full h-full bg-gradient-to-br {{ grad }} flex items-center justify-center">
+                            <i class="fas fa-music text-5xl text-white/20"></i>
+                        </div>
+                        {# Hover overlay #}
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <div class="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+                                <i class="fas fa-play text-white text-xl ml-1"></i>
+                            </div>
+                        </div>
+                        {# Track count badge #}
+                        <div class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-black/60 backdrop-blur-sm text-xs text-gray-300">
+                            {{ playlist.tracks|length }} tracks
+                        </div>
+                    </div>
+
+                    {# Info #}
+                    <div class="p-4">
+                        <h3 class="font-bold text-white truncate group-hover:text-fuchsia-300 transition-colors">{{ playlist.name }}</h3>
+                        <p class="text-xs text-gray-500 mt-1">Updated recently</p>
+                    </div>
+
+                    {# Bottom neon line #}
+                    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </a>
+            {% endfor %}
+        </div>
+
+        {# Empty state #}
+        {% if playlists|length == 0 %}
+            <div class="text-center py-20">
+                <div class="w-24 h-24 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-headphones text-4xl text-gray-600"></i>
+                </div>
+                <p class="text-gray-400 text-lg mb-2">No playlists yet</p>
+                <p class="text-gray-600 text-sm">Create your first playlist and let AI suggest songs for you</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{# ══════════════════════════════════════════════════════════════════════
+   SMART CREATE MODAL
+══════════════════════════════════════════════════════════════════════ #}
+<div id="create-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" aria-modal="true">
+    {# Backdrop #}
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeCreateModal()"></div>
+
+    {# Modal Card #}
+    <div class="relative w-full max-w-2xl bg-[#0d0d14] border border-white/10 rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.8)] overflow-hidden animate-[modalIn_0.3s_ease-out_both]">
+
+        {# Gradient top bar #}
+        <div class="h-1 w-full bg-gradient-to-r from-cyan-500 via-blue-500 to-fuchsia-600"></div>
+
+        <div class="p-8">
+            {# Header #}
+            <div class="flex items-start justify-between mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold text-white font-['Outfit']">Create Playlist</h2>
+                    <p class="text-sm text-gray-500 mt-1">AI will suggest songs based on your mood</p>
+                </div>
+                <button onclick="closeCreateModal()" class="text-gray-600 hover:text-white transition-colors p-1">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <form action="{{ path('app_playlist_create') }}" method="POST" id="create-form">
+                {# Step 1: Name #}
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold tracking-widest text-gray-500 uppercase mb-3">Playlist Name</label>
+                    <input type="text" name="name" id="playlist-name" required
+                           class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-lg placeholder-gray-600 focus:outline-none focus:border-cyan-500/60 focus:bg-white/[0.07] transition-all"
+                           placeholder="My Awesome Mix...">
+                </div>
+
+                {# Step 2: Mood/Genre Chips #}
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold tracking-widest text-gray-500 uppercase mb-3">Vibe / Mood</label>
+                    <div class="flex flex-wrap gap-2" id="mood-chips">
+                        {% set moods = [
+                            {'label': '🔥 Hype', 'value': 'hype'},
+                            {'label': '🌊 Chill', 'value': 'chill'},
+                            {'label': '🎯 Focus', 'value': 'focus'},
+                            {'label': '🎉 Party', 'value': 'party'},
+                            {'label': '💜 Sad', 'value': 'sad'},
+                            {'label': '🌙 Late Night', 'value': 'night'},
+                            {'label': '💪 Workout', 'value': 'workout'},
+                        ] %}
+                        {% for mood in moods %}
+                            <button type="button"
+                                class="mood-chip px-4 py-2 rounded-full text-sm border border-white/10 bg-white/5 text-gray-400 hover:border-cyan-500/50 hover:text-white hover:bg-cyan-500/10 transition-all"
+                                data-mood="{{ mood.value }}">
+                                {{ mood.label }}
+                            </button>
+                        {% endfor %}
+
+                        {# Also show real genres from DB #}
+                        {% for cat in categories %}
+                            <button type="button"
+                                class="mood-chip px-4 py-2 rounded-full text-sm border border-white/10 bg-white/5 text-gray-400 hover:border-fuchsia-500/50 hover:text-white hover:bg-fuchsia-500/10 transition-all"
+                                data-mood="{{ cat.name|lower }}">
+                                🎵 {{ cat.name }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {# Step 3: Song Suggestions Panel #}
+                <div id="suggestions-panel" class="mb-6 hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-xs font-semibold tracking-widest text-gray-500 uppercase">Suggested Songs</label>
+                        <button type="button" id="add-all-btn"
+                            class="text-xs text-cyan-400 hover:text-cyan-300 border border-cyan-500/30 px-3 py-1 rounded-full hover:bg-cyan-500/10 transition-all hidden">
+                            + Add All to Playlist
+                        </button>
+                    </div>
+                    <div id="suggestions-list" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+                        {# Filled by JS #}
+                    </div>
+                    <p id="suggestions-empty" class="text-sm text-gray-600 text-center py-4 hidden">No tracks found for this vibe yet</p>
+                    <div id="suggestions-loading" class="text-center py-4 hidden">
+                        <i class="fas fa-spinner fa-spin text-cyan-500"></i>
+                        <span class="text-sm text-gray-500 ml-2">Finding tracks...</span>
+                    </div>
+                </div>
+
+                {# Hidden: selected track IDs to add after creation #}
+                <input type="hidden" name="suggested_tracks" id="suggested-tracks-input" value="">
+
+                {# Submit #}
+                <button type="submit"
+                    class="w-full py-4 rounded-2xl bg-gradient-to-r from-cyan-500 to-fuchsia-600 text-white font-bold text-base hover:opacity-90 hover:shadow-[0_0_30px_rgba(6,182,212,0.4)] transition-all active:scale-[0.98]">
+                    <i class="fas fa-magic mr-2"></i>Create Playlist
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# ── Styles ──────────────────────────────────────────────────────────── #}
+<style>
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.92) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.mood-chip.active {
+    border-color: rgba(6,182,212,0.7);
+    background: rgba(6,182,212,0.15);
+    color: #22d3ee;
+}
+#suggestions-list::-webkit-scrollbar { width: 4px; }
+#suggestions-list::-webkit-scrollbar-track { background: transparent; }
+#suggestions-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+</style>
+
+{# ── Scripts ─────────────────────────────────────────────────────────── #}
+<script>
+// ── Playlist Logic (Scoped) ────────────────────────────────────────────
+(() => {
+    // ── Modal ──────────────────────────────────────────────────────────────
+    const openCreateModal = () => {
+        const m = document.getElementById('create-modal');
+        if (m) {
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+    };
+
+    // Expose globally for onclick attributes (legacy support)
+    window.openCreateModal = openCreateModal;
+
+    const closeCreateModal = () => {
+        const m = document.getElementById('create-modal');
+        if (m) {
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+            document.body.style.overflow = '';
+        }
+    };
+    window.closeCreateModal = closeCreateModal;
+
+    const openBtn = document.getElementById('open-create-modal');
+    if (openBtn) openBtn.addEventListener('click', openCreateModal);
+
+    // ── Mood Chips ─────────────────────────────────────────────────────────
+    let selectedMood = '';
+    let selectedTrackIds = [];
+    const moodChips = document.querySelectorAll('.mood-chip');
+    
+    // Suggestion Elements
+    const panel = document.getElementById('suggestions-panel');
+    const list  = document.getElementById('suggestions-list');
+    const empty = document.getElementById('suggestions-empty');
+    const loading = document.getElementById('suggestions-loading');
+    const addAllBtn = document.getElementById('add-all-btn');
+    const tracksInput = document.getElementById('suggested-tracks-input');
+
+    const fetchSuggestions = async (genre) => {
+        if (!panel) return;
+
+        panel.classList.remove('hidden');
+        loading.classList.remove('hidden');
+        list.innerHTML = '';
+        empty.classList.add('hidden');
+        addAllBtn.classList.add('hidden');
+        selectedTrackIds = [];
+
+        try {
+            const res = await fetch(`/api/playlist/suggestions?genre=${encodeURIComponent(genre)}`);
+            const tracks = await res.json();
+            if (!loading) return; // Cleanup might have run
+            loading.classList.add('hidden');
+
+            if (!tracks.length) {
+                empty.classList.remove('hidden');
+                return;
+            }
+
+            addAllBtn.classList.remove('hidden');
+            tracks.forEach(track => {
+                const el = document.createElement('div');
+                el.className = 'suggestion-item flex items-center space-x-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.07] transition-all cursor-pointer group';
+                el.dataset.id = track.id;
+                el.innerHTML = `
+                    <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-700 to-fuchsia-800 flex items-center justify-center flex-shrink-0">
+                        ${track.cover
+                            ? `<img src="/uploads/images/${track.cover}" class="w-full h-full object-cover rounded-lg">`
+                            : `<i class="fas fa-music text-white/40 text-xs"></i>`}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-white truncate">${track.title}</p>
+                        <p class="text-xs text-gray-500 truncate">${track.artist ?? 'Unknown'}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-gray-600"><i class="fas fa-play mr-1"></i>${track.plays}</span>
+                        <div class="w-5 h-5 rounded-full border border-white/20 flex items-center justify-center check-icon opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="fas fa-check text-[10px] text-cyan-400"></i>
+                        </div>
+                    </div>
+                `;
+                el.addEventListener('click', () => toggleTrack(el, track.id));
+                list.appendChild(el);
+            });
+        } catch(e) {
+            loading?.classList.add('hidden');
+            empty?.classList.remove('hidden');
+        }
+    };
+
+    const toggleTrack = (el, id) => {
+        const idx = selectedTrackIds.indexOf(id);
+        if (idx === -1) {
+            selectedTrackIds.push(id);
+            el.classList.add('border-cyan-500/40', 'bg-cyan-500/10');
+            el.querySelector('.check-icon')?.classList.remove('opacity-0');
+        } else {
+            selectedTrackIds.splice(idx, 1);
+            el.classList.remove('border-cyan-500/40', 'bg-cyan-500/10');
+            el.querySelector('.check-icon')?.classList.add('opacity-0');
+        }
+        if (tracksInput) tracksInput.value = selectedTrackIds.join(',');
+    };
+
+    const onChipClick = (e) => {
+        const chip = e.currentTarget;
+        moodChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        selectedMood = chip.dataset.mood;
+        fetchSuggestions(selectedMood);
+    };
+
+    moodChips.forEach(chip => chip.addEventListener('click', onChipClick));
+
+    const onAddAll = () => {
+        document.querySelectorAll('.suggestion-item').forEach(el => {
+            const id = parseInt(el.dataset.id);
+            if (!selectedTrackIds.includes(id)) {
+                selectedTrackIds.push(id);
+                el.classList.add('border-cyan-500/40', 'bg-cyan-500/10');
+                el.querySelector('.check-icon')?.classList.remove('opacity-0');
+            }
+        });
+        if (tracksInput) tracksInput.value = selectedTrackIds.join(',');
+    };
+
+    if (addAllBtn) addAllBtn.addEventListener('click', onAddAll);
+
+    // CLEANUP
+    const cleanup = () => {
+        if (openBtn) openBtn.removeEventListener('click', openCreateModal);
+        moodChips.forEach(chip => chip.removeEventListener('click', onChipClick));
+        if (addAllBtn) addAllBtn.removeEventListener('click', onAddAll);
+        
+        // Remove globals
+        delete window.openCreateModal;
+        delete window.closeCreateModal;
+        
+        document.removeEventListener('turbo:before-cache', cleanup);
+    };
+    document.addEventListener('turbo:before-cache', cleanup, { once: true });
+})();
+
+// ── Constellation Background ───────────────────────────────────────────
+(function initConstellation() {
+    const canvas = document.getElementById('constellation-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W, H, nodes = [];
+
+    function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    for (let i = 0; i < 60; i++) {
+        nodes.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            vx: (Math.random() - 0.5) * 0.3,
+            vy: (Math.random() - 0.5) * 0.3,
+            r: Math.random() * 2 + 1,
+        });
+    }
+
+    let mouse = { x: -9999, y: -9999 };
+    document.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        nodes.forEach(n => {
+            n.x += n.vx; n.y += n.vy;
+            if (n.x < 0 || n.x > W) n.vx *= -1;
+            if (n.y < 0 || n.y > H) n.vy *= -1;
+
+            // Mouse repel
+            const dx = n.x - mouse.x, dy = n.y - mouse.y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 120) { n.x += dx/dist * 1.5; n.y += dy/dist * 1.5; }
+
+            ctx.beginPath();
+            ctx.arc(n.x, n.y, n.r, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(6,182,212,0.6)';
+            ctx.fill();
+        });
+
+        // Draw lines between close nodes
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i+1; j < nodes.length; j++) {
+                const dx = nodes[i].x - nodes[j].x;
+                const dy = nodes[i].y - nodes[j].y;
+                const d = Math.sqrt(dx*dx + dy*dy);
+                if (d < 150) {
+                    ctx.beginPath();
+                    ctx.moveTo(nodes[i].x, nodes[i].y);
+                    ctx.lineTo(nodes[j].x, nodes[j].y);
+                    ctx.strokeStyle = `rgba(6,182,212,${0.15 * (1 - d/150)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+        }
+        requestAnimationFrame(draw);
+    }
+    draw();
+})();
+</script>
+{% endblock %}

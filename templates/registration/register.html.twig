@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register{% endblock %}
+
+{% block body %}
+<div class="flex items-center justify-center min-h-screen relative overflow-hidden py-12">
+    {# Background with blur #}
+    <div class="absolute inset-0 bg-black/80 z-0"></div>
+    
+    <div class="w-full max-w-md p-8 space-y-8 bg-gray-900/50 backdrop-blur-md rounded-2xl border border-gray-800 shadow-[0_0_50px_rgba(217,70,239,0.1)] z-10 relative">
+        <div class="text-center">
+            <h2 class="mt-6 text-3xl font-bold font-['Outfit'] text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-500 to-purple-600">
+                Create Account
+            </h2>
+            <p class="mt-2 text-sm text-gray-400">Join the revolution</p>
+        </div>
+
+        {{ form_start(registrationForm, {'attr': {'class': 'mt-8 space-y-6'}}) }}
+            {% if form_errors(registrationForm) %}
+                <div class="p-4 mb-4 text-sm text-red-500 rounded-lg bg-red-500/10 border border-red-500/20">
+                    {{ form_errors(registrationForm) }}
+                </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                <div>
+                    {{ form_label(registrationForm.username, 'Username', {'label_attr': {'class': 'block text-sm font-medium text-gray-300'}}) }}
+                    {{ form_widget(registrationForm.username, {'attr': {'class': 'block w-full px-4 py-3 mt-1 text-white bg-black/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-fuchsia-500 focus:border-fuchsia-500 placeholder-gray-500 outline-none transition-all'}}) }}
+                    <div class="text-red-500 text-sm mt-1">{{ form_errors(registrationForm.username) }}</div>
+                </div>
+
+                <div>
+                    {{ form_label(registrationForm.email, 'Email Address', {'label_attr': {'class': 'block text-sm font-medium text-gray-300'}}) }}
+                    {{ form_widget(registrationForm.email, {'attr': {'class': 'block w-full px-4 py-3 mt-1 text-white bg-black/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-fuchsia-500 focus:border-fuchsia-500 placeholder-gray-500 outline-none transition-all'}}) }}
+                    <div class="text-red-500 text-sm mt-1">{{ form_errors(registrationForm.email) }}</div>
+                </div>
+                
+                <div>
+                    {{ form_label(registrationForm.plainPassword, 'Password', {'label_attr': {'class': 'block text-sm font-medium text-gray-300'}}) }}
+                    {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'block w-full px-4 py-3 mt-1 text-white bg-black/50 border border-gray-700 rounded-lg focus:ring-2 focus:ring-fuchsia-500 focus:border-fuchsia-500 placeholder-gray-500 outline-none transition-all'}}) }}
+                    <div class="text-red-500 text-sm mt-1">{{ form_errors(registrationForm.plainPassword) }}</div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">I want to be a</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        {% for child in registrationForm.role %}
+                            <label class="cursor-pointer">
+                                {{ form_widget(child, {'attr': {'class': 'peer sr-only'}}) }}
+                                <div class="p-4 rounded-lg border border-gray-700 bg-black/40 text-center peer-checked:border-cyan-500 peer-checked:bg-cyan-500/10 transition-all peer-checked:text-cyan-400">
+                                    {% if child.vars.value == 'listener' %}
+                                        <i class="fas fa-headphones text-xl mb-2 text-gray-400 peer-checked:text-cyan-400"></i>
+                                    {% else %}
+                                        <i class="fas fa-music text-xl mb-2 text-gray-400 peer-checked:text-fuchsia-400"></i>
+                                    {% endif %}
+                                    <div class="text-sm font-semibold text-gray-300 peer-checked:text-current">{{ child.vars.label }}</div>
+                                </div>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'w-4 h-4 text-fuchsia-600 bg-gray-700 border-gray-600 rounded focus:ring-fuchsia-500'}}) }}
+                    {{ form_label(registrationForm.agreeTerms, 'I agree to the terms', {'label_attr': {'class': 'ml-2 block text-sm text-gray-300'}}) }}
+                </div>
+                <div class="text-red-500 text-sm mt-2 ml-1">{{ form_errors(registrationForm.agreeTerms) }}</div>
+            </div>
+
+            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-fuchsia-600 hover:bg-fuchsia-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-fuchsia-500 transition-all font-bold tracking-wide hover:shadow-[0_0_20px_rgba(217,70,239,0.4)]">
+                Create Account
+            </button>
+            
+            <div class="text-center text-sm text-gray-400">
+                Already have an account? <a href="{{ path('app_login') }}" class="font-medium text-fuchsia-400 hover:text-fuchsia-300 transition-colors">Sign in</a>
+            </div>
+        {{ form_end(registrationForm) }}
+    </div>
+</div>
+{% endblock %}

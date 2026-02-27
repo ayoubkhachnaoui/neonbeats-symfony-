@@ -1,31 +1,50 @@
+###> OS & IDE junk ###
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+###< OS & IDE junk ###
 
-###> symfony/framework-bundle ###
+###> Symfony / PHP ###
 /.env.local
 /.env.local.php
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
-/public/bundles/
 /var/
 /vendor/
-###< symfony/framework-bundle ###
+###< Symfony / PHP ###
 
-###> phpunit/phpunit ###
+###> PHPUnit ###
 /phpunit.xml
 /.phpunit.cache/
-###< phpunit/phpunit ###
+###< PHPUnit ###
 
-###> symfony/asset-mapper ###
+###> Asset Mapper ###
 /public/assets/
 /assets/vendor/
-###< symfony/asset-mapper ###
+###< Asset Mapper ###
 
-###> symfony/webpack-encore-bundle ###
+###> Webpack Encore ###
 /node_modules/
 /public/build/
 npm-debug.log
 yarn-error.log
-###< symfony/webpack-encore-bundle ###
+stats.json
+###< Webpack Encore ###
 
-### User Uploads ###
+###> Log & Debug Files ###
+*.log
+*.log.*
+###< Log & Debug Files ###
+
+###> Uploads ###
 /public/uploads/
 !/public/uploads/.gitignore
+###< Uploads ###
+
+###> Misc Dev Artifacts ###
+users_list.txt
+*.txt.bak
+###< Misc Dev Artifacts ###

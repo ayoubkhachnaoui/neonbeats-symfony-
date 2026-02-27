@@ -1,0 +1,551 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Studio - Upload Master Track{% endblock %}
+
+{% block body %}
+{# DAW / Studio Layout #}
+<div class="fixed inset-0 z-50 bg-[#0f0f0f] text-[#8a8a8a] font-mono text-[11px] flex flex-col overflow-hidden selection:bg-cyan-500/30">
+
+    {# ── Global Styles for Studio ── #}
+    <style>
+        .studio-input {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            color: #ccc;
+            padding: 4px 8px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .studio-input:focus {
+            border-color: #06b6d4;
+            color: #fff;
+        }
+        .studio-label {
+            display: block;
+            margin-bottom: 4px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 9px;
+        }
+        .studio-panel {
+            background-color: #141414;
+            border: 1px solid #222;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+        }
+        .studio-btn {
+            background: linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%);
+            border: 1px solid #333;
+            border-radius: 2px;
+            color: #aaa;
+            padding: 4px 12px;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            transition: all 0.1s;
+        }
+        .studio-btn:active {
+            background: #111;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+            color: #fff;
+        }
+        .studio-btn-primary {
+            background: linear-gradient(180deg, #d946ef 0%, #a21caf 100%);
+            border-color: #f0abfc;
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .studio-btn-primary:hover {
+            background: linear-gradient(180deg, #e879f9 0%, #c026d3 100%);
+        }
+        .studio-btn-primary:active {
+            background: #a21caf;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .knob {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: conic-gradient(from 220deg at 50% 50%, #06b6d4 0%, #06b6d4 40%, #222 40%, #222 100%);
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.1), 0 2px 4px rgba(0,0,0,0.8);
+            border: 2px solid #111;
+        }
+        .knob::after {
+            content: '';
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border-radius: 50%;
+            background: #1a1a1a;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .knob-indicator {
+            position: absolute;
+            top: 2px;
+            left: 50%;
+            width: 2px;
+            height: 8px;
+            background: #fff;
+            transform-origin: 50% 14px;
+            transform: translateX(-50%) rotate(-45deg);
+            z-index: 10;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f0f0f; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 0; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    </style>
+
+    {# ── Top Menu Bar ── #}
+    <div class="h-10 bg-[#181818] border-b border-[#2a2a2a] flex items-center justify-between px-3 flex-shrink-0 relative z-20">
+        <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-2 text-white font-bold font-['Outfit'] tracking-widest text-xs">
+                <i class="fas fa-wave-square text-cyan-500"></i>
+                <span>NEON/STUDIO v3.0</span>
+            </div>
+            <div class="hidden md:flex items-center space-x-4 text-[#888] cursor-default">
+                <span class="hover:text-white cursor-pointer px-1">File</span>
+                <span class="hover:text-white cursor-pointer px-1">Edit</span>
+                <span class="hover:text-white cursor-pointer px-1">Add</span>
+                <span class="hover:text-white cursor-pointer px-1">View</span>
+                <span class="hover:text-white cursor-pointer px-1">Help</span>
+            </div>
+        </div>
+
+        {# Transport Controls (Mocked visually) #}
+        <div class="flex items-center space-x-1 bg-[#0f0f0f] rounded-sm border border-[#222] p-1">
+            <button class="w-8 h-6 flex items-center justify-center text-[#555] hover:text-white hover:bg-[#222] rounded-sm transition-colors"><i class="fas fa-backward text-[10px]"></i></button>
+            <button class="w-8 h-6 flex items-center justify-center text-cyan-500 hover:text-cyan-400 hover:bg-[#222] rounded-sm transition-colors"><i class="fas fa-play text-[10px]"></i></button>
+            <button class="w-8 h-6 flex items-center justify-center text-[#555] hover:text-white hover:bg-[#222] rounded-sm transition-colors"><i class="fas fa-stop text-[10px]"></i></button>
+            <div class="w-px h-4 bg-[#333] mx-1"></div>
+            {# Actual Form Submit Button acts as "Record" #}
+            <button type="submit" form="upload-form" class="w-16 h-6 flex items-center justify-center space-x-1 text-red-500 font-bold hover:bg-red-500/20 rounded-sm transition-colors border border-transparent hover:border-red-500/50">
+                <i class="fas fa-circle text-[8px] animate-pulse"></i>
+                <span>REC</span>
+            </button>
+        </div>
+
+        <div class="flex items-center space-x-4">
+            <div class="text-right">
+                <div class="text-[#444] text-[8px] leading-tight">CPU</div>
+                <div class="w-16 h-1.5 bg-[#000] border border-[#222] rounded-full overflow-hidden mt-0.5">
+                    <div class="h-full bg-green-500 w-[12%]"></div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-[#444] text-[8px] leading-tight">DISK</div>
+                <div class="w-16 h-1.5 bg-[#000] border border-[#222] rounded-full overflow-hidden mt-0.5">
+                    <div class="h-full bg-cyan-500 w-[4%]"></div>
+                </div>
+            </div>
+            <div class="bg-black border border-[#333] text-cyan-400 font-mono px-2 py-0.5 text-xs shadow-inner">
+                00:00:00:00
+            </div>
+            <a href="{{ path('app_discover') }}" class="text-[#666] hover:text-white transition-colors ml-4" title="Close Studio">
+                <i class="fas fa-times text-sm"></i>
+            </a>
+        </div>
+    </div>
+
+    {# ── Main Workspace ── #}
+    <div class="flex-1 flex overflow-hidden">
+        
+        {# Left Panel: Inspector & Uploader #}
+        <div class="w-72 bg-[#181818] border-r border-[#2a2a2a] flex flex-col flex-shrink-0 shadow-xl z-10 overflow-y-auto">
+            <div class="bg-[#222] border-b border-[#333] p-2 flex items-center justify-between sticky top-0 z-10">
+                <span class="font-bold text-white text-[10px] tracking-wider uppercase">Master Track Inspector</span>
+                <i class="fas fa-sliders-h text-cyan-500"></i>
+            </div>
+
+            <div class="p-4">
+                {% for message in app.flashes('error') %}
+                    <div class="bg-red-900/50 border border-red-500 text-red-400 px-3 py-2 text-[10px] mb-4 flex items-start space-x-2">
+                        <i class="fas fa-exclamation-triangle mt-0.5"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+                {% for message in app.flashes('success') %}
+                    <div class="bg-green-900/50 border border-green-500 text-green-400 px-3 py-2 text-[10px] mb-4 flex items-start space-x-2">
+                        <i class="fas fa-check mt-0.5"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+
+                {{ form_start(form, {'attr': {'id': 'upload-form', 'class': 'space-y-5', 'enctype': 'multipart/form-data'}}) }}
+
+                <div class="studio-panel p-3">
+                    <label class="studio-label">M-01 / Track Title</label>
+                    {{ form_widget(form.title, {'attr': {'class': 'studio-input', 'placeholder': 'Untitled Project'}}) }}
+                    <div class="text-red-500 text-[9px] mt-1">{{ form_errors(form.title) }}</div>
+                </div>
+
+                <div class="studio-panel p-3">
+                    <label class="studio-label">M-02 / Primary Genre</label>
+                    <div class="relative">
+                        {{ form_widget(form.genre, {'attr': {'class': 'studio-input pr-6', 'list': 'genre-list'}}) }}
+                        <i class="fas fa-chevron-down absolute right-2 top-1.5 text-[#555] text-[10px] pointer-events-none"></i>
+                    </div>
+                    <datalist id="genre-list">
+                        {% for category in categories %}
+                            <option value="{{ category.name }}"></option>
+                        {% endfor %}
+                    </datalist>
+                    <div class="text-red-500 text-[9px] mt-1">{{ form_errors(form.genre) }}</div>
+                </div>
+
+                <div class="studio-panel p-3 space-y-4">
+                    <div class="border-b border-[#222] pb-2 text-[9px] text-[#666] tracking-widest uppercase font-bold">
+                        Media Assets Layer
+                    </div>
+
+                    {# Audio Upload #}
+                    <div>
+                        <label class="studio-label flex justify-between">
+                            <span>Audio Source (.mp3/.wav)</span>
+                            <span class="text-cyan-500" id="audio-status">Idle</span>
+                        </label>
+                        <label class="block cursor-pointer">
+                            <div class="bg-[#0f0f0f] border border-dashed border-[#444] hover:border-cyan-500 transition-colors h-16 flex flex-col items-center justify-center text-[#555] hover:text-cyan-400 group relative overflow-hidden">
+                                <i class="fas fa-waveform mb-1 text-sm"></i>
+                                <span class="text-[9px]" id="audio-filename">Select Audio File</span>
+                                <div class="absolute inset-0 bg-cyan-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            </div>
+                            <div class="hidden">{{ form_widget(form.audioFile) }}</div>
+                        </label>
+                        <div class="text-red-500 text-[9px] mt-1">{{ form_errors(form.audioFile) }}</div>
+                    </div>
+
+                    {# Image Upload #}
+                    <div>
+                        <label class="studio-label flex justify-between">
+                            <span>Cover Artwork (.jpg/.png)</span>
+                            <span class="text-fuchsia-500" id="img-status">Empty</span>
+                        </label>
+                        <label class="block cursor-pointer relative">
+                            <div class="bg-[#0f0f0f] border border-dashed border-[#444] hover:border-fuchsia-500 transition-colors h-24 flex flex-col items-center justify-center text-[#555] hover:text-fuchsia-400 group relative overflow-hidden">
+                                <i class="fas fa-image text-lg mb-1 z-10"></i>
+                                <span class="text-[9px] z-10" id="img-filename">Drop JPG/PNG</span>
+                                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-fuchsia-900/50 to-transparent h-12 opacity-0 group-hover:opacity-100 transition-opacity z-0"></div>
+                                <img id="cover-preview" src="" class="absolute inset-0 w-full h-full object-cover hidden opacity-40 mix-blend-screen z-0">
+                            </div>
+                            <div class="hidden">{{ form_widget(form.coverImage) }}</div>
+                        </label>
+                        <div class="text-red-500 text-[9px] mt-1">{{ form_errors(form.coverImage) }}</div>
+                    </div>
+                </div>
+
+                <div class="hidden">
+                    {{ form_widget(form.bpm) }}
+                    {{ form_widget(form.duration) }}
+                </div>
+
+                {# Action Panel #}
+                <div class="bg-[#111] p-3 border border-[#333] rounded-sm">
+                    <p class="text-[9px] text-[#666] mb-3 leading-relaxed">
+                        Ensure you own the rights to this master recording before pressing process. File size limits apply.
+                    </p>
+                    <button type="submit" class="studio-btn-primary w-full py-2 font-bold tracking-widest text-[10px] flex items-center justify-center group" id="process-btn">
+                        <i class="fas fa-microchip mr-2 group-hover:animate-pulse"></i>
+                        PROCESS TRACK
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+
+        {# Right Area: Arrangement & Mixer #}
+        <div class="flex-1 flex flex-col bg-[#0a0a0a] relative">
+            
+            {# Arrangement View (Mocked Canvas) #}
+            <div class="flex-1 relative overflow-hidden flex flex-col">
+                {# Timeline header #}
+                <div class="h-6 border-b border-[#222] bg-[#141414] flex">
+                    <div class="w-24 border-r border-[#222] flex-shrink-0 bg-[#1a1a1a]"></div>
+                    <div class="flex-1 relative bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSIyNCI+PHBhdGggZD0iTTAgMjRMSDAgMCIgc3Ryb2tlPSIjMzMzIiBzdHJva2Utd2lkdGg9IjEiLz48cGF0aCBkPSJNMTAgMTRMMTAgMCIgc3Ryb2tlPSIjMjIyIiBzdHJva2Utd2lkdGg9IjEiLz48cGF0aCBkPSJNMjAgMTRMMjAgMCIgc3Ryb2tlPSIjMjIyIiBzdHJva2Utd2lkdGg9IjEiLz48cGF0aCBkPSJNMzAgMTRMMzAgMCIgc3Ryb2tlPSIjMjIyIiBzdHJva2Utd2lkdGg9IjEiLz48L3N2Zz4=')]">
+                        {# Playhead #}
+                        <div class="absolute top-0 bottom-0 w-px bg-red-500 left-[12%] z-20 shadow-[0_0_8px_rgba(239,68,68,0.8)]">
+                            <div class="absolute -top-1 -left-1.5 w-0 h-0 border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent border-t-red-500"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Tracks Grid #}
+                <div class="flex-1 relative bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI2NCI+PHBhdGggZD0iTTQwIDY0TDAgNjRMMCAwIiBmaWxsPSJub25lIiBzdHJva2U9IiMxYTFhMWEiIHN0cm9rZS13aWR0aD0iMSIvPjwvc3ZnPg==')] overflow-y-auto">
+                    
+                    {# Track 1 (Master Upload Visual) #}
+                    <div class="flex h-16 border-b border-[#222] bg-cyan-900/10 hover:bg-cyan-900/20 transition-colors group">
+                        <div class="w-24 bg-[#111] border-r border-[#222] p-2 flex flex-col justify-between flex-shrink-0">
+                            <div class="flex justify-between items-center text-[#888]">
+                                <span class="font-bold text-white group-hover:text-cyan-400 text-[10px]">NEW</span>
+                                <i class="fas fa-volume-up text-[9px]"></i>
+                            </div>
+                            <div class="flex space-x-1">
+                                <button class="w-4 h-4 bg-red-900/50 border border-red-500 rounded text-red-500 text-[8px] flex justify-center items-center">R</button>
+                            </div>
+                        </div>
+                        <div class="flex-1 relative p-1">
+                            {# Waveform Mock #}
+                            <div class="absolute top-2 bottom-2 left-6 right-1/4 rounded bg-cyan-900/40 border border-cyan-500/50 flex items-center justify-center overflow-hidden">
+                                <div class="w-full h-full opacity-60 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMCA1MCBMMTAgMjAgTDIwIDgwIEwzMCAzMCBMNDAgNzAgTDUwIDEwIEw2MCA5MCBMNzAgNDAgTDgwIDYwIEw5MCAyMCBMMTAwIDUwIiBzdHJva2U9IiMwNmI2ZDQiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjwvc3ZnPg==')] bg-[length:20px_100%]"></div>
+                                <span class="absolute text-cyan-200 text-[9px] font-bold mix-blend-overlay">Pending Upload...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Uploaded Tracks Library #}
+                    {% for t in myTracks %}
+                    <div class="flex h-16 border-b border-[#222] bg-white/[0.01] hover:bg-white/[0.03] transition-colors group">
+                        <div class="w-32 bg-[#111] border-r border-[#222] p-2 flex flex-col justify-between flex-shrink-0">
+                            <div class="flex justify-between items-center text-[#888]">
+                                <span class="font-bold text-[#ccc] truncate pr-2 text-[10px]" title="{{ t.title }}">{{ t.title }}</span>
+                            </div>
+                            <div class="flex items-center text-[9px] space-x-2 text-[#666]">
+                                <span><i class="fas fa-play text-[8px] mr-1"></i>{{ t.playCount }}</span>
+                                <span><i class="fas fa-heart text-[8px] mr-1"></i><span class="like-count-{{ t.id }}">{{ t.likedBy|length }}</span></span>
+                            </div>
+                        </div>
+                        <div class="flex-1 relative p-1 flex items-center px-4 group">
+                            {# Track Block representation #}
+                            <div class="h-10 rounded border flex items-center px-3 w-[60%] justify-between shadow-sm relative overflow-hidden group-hover:bg-[#1a1a1a] transition-colors"
+                                 style="background-color: {{ t.category.hexColor|default('#333') }}10; border-color: {{ t.category.hexColor|default('#333') }}50;">
+                                <div class="flex items-center space-x-3 z-10">
+                                    <span class="text-[10px] font-bold" style="color: {{ t.category.hexColor|default('#ccc') }}">{{ t.title }}</span>
+                                    <span class="text-[8px] text-[#888] px-1 border border-[#333] rounded-sm">{{ t.category.name|default('Uncategorized') }}</span>
+                                </div>
+                                
+                                {# Actions Overlay on Hover #}
+                                <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity z-10 transition-all transform translate-x-4 group-hover:translate-x-0">
+                                    <a href="{{ path('app_track_play', {'id': t.id}) }}" target="_blank" class="w-6 h-6 rounded bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500 hover:text-black flex items-center justify-center transition-colors" title="Play">
+                                        <i class="fas fa-play text-[9px] ml-0.5"></i>
+                                    </a>
+                                    
+                                    <button type="button" onclick="openDeleteModal('{{ path('app_track_delete', {'id': t.id}) }}', '{{ csrf_token('delete' ~ t.id) }}', '{{ t.title|escape('js') }}')" class="w-6 h-6 rounded bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-black flex items-center justify-center transition-colors" title="Delete">
+                                        <i class="fas fa-trash text-[9px]"></i>
+                                    </button>
+                                </div>
+
+                                {# Background Waveform style overlay #}
+                                <div class="absolute inset-y-0 right-0 w-32 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMCA1MCBMMTAgMjAgTDIwIDgwIEwzMCAzMCBMNDAgNzAgTDUwIDEwIEw2MCA5MCBMNzAgNDAgTDgwIDYwIEw5MCAyMCBMMTAwIDUwIiBzdHJva2U9IiNmZmZmZmYyMiIgc3Ryb2tlLXdpZHRoPSIxIiBmaWxsPSJub25lIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+')] bg-[length:15px_100%] opacity-30 mask-image:linear-gradient(to left,black,transparent)"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# Bottom Mixer Panel #}
+            <div class="h-64 border-t-2 border-[#333] bg-[#141414] shadow-[0_-10px_30px_rgba(0,0,0,0.5)] flex flex-col flex-shrink-0">
+                <div class="h-6 bg-[#1a1a1a] border-b border-[#222] px-2 flex items-center">
+                    <span class="text-[9px] text-[#666] font-bold tracking-widest uppercase">Console / Mixer</span>
+                </div>
+                <div class="flex-1 p-2 flex space-x-1 overflow-x-auto">
+                    
+                    {# Channel Strip #}
+                    {% for i in 1..4 %}
+                    <div class="w-20 bg-[#0f0f0f] border border-[#222] rounded-sm flex flex-col items-center p-2 flex-shrink-0">
+                        <div class="text-[8px] text-[#555] font-bold mb-2">CH {{ i }}</div>
+                        
+                        {# Knobs #}
+                        <div class="space-y-3 mb-4">
+                            <div class="flex flex-col items-center">
+                                <div class="knob" style="background: conic-gradient(from 220deg at 50% 50%, #f43f5e 0%, #f43f5e {{ random(30, 80) }}%, #222 0, #222 100%)">
+                                    <div class="knob-indicator" style="transform: translateX(-50%) rotate({{ random(-45, 135) }}deg)"></div>
+                                </div>
+                                <span class="text-[8px] mt-1 text-[#666]">GAIN</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <div class="knob" style="background: conic-gradient(from 220deg at 50% 50%, #06b6d4 0%, #06b6d4 {{ random(20, 90) }}%, #222 0, #222 100%)">
+                                    <div class="knob-indicator" style="transform: translateX(-50%) rotate({{ random(-45, 135) }}deg)"></div>
+                                </div>
+                                <span class="text-[8px] mt-1 text-[#666]">EQ</span>
+                            </div>
+                        </div>
+
+                        {# Fader Track #}
+                        <div class="relative w-8 flex-1 bg-[#0a0a0a] rounded-full border border-[#222] flex justify-center py-2 mb-2 shadow-inner">
+                            <div class="w-1 h-full bg-[#111] rounded-full"></div>
+                            {# Fader Thumb #}
+                            <div class="absolute w-6 h-8 bg-gradient-to-b from-[#333] to-[#111] border-y-2 border-[#555] rounded-sm shadow-md cursor-ns-resize hover:bg-[#444] transition-colors" style="bottom: {{ i == 1 ? '60%' : random(20, 50) ~ '%' }}">
+                                <div class="w-full h-0.5 bg-white/20 mt-3"></div>
+                            </div>
+                        </div>
+                        <div class="w-full flex space-x-0.5 mt-auto">
+                            <div class="h-1 flex-1 bg-[#222] rounded-full overflow-hidden flex flex-col justify-end">
+                                <div class="w-full bg-green-500" style="height: {{ random(10, 80) }}%"></div>
+                            </div>
+                            <div class="h-1 flex-1 bg-[#222] rounded-full overflow-hidden flex flex-col justify-end">
+                                <div class="w-full bg-green-500" style="height: {{ random(10, 80) }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="w-px bg-[#222] mx-2 h-full"></div>
+
+                    {# Master Bus #}
+                    <div class="w-24 bg-[#0a0a0a] border border-[#222] rounded-sm flex flex-col items-center p-2 flex-shrink-0 shadow-[inset_0_0_15px_rgba(0,0,0,0.8)]">
+                        <div class="text-[8px] text-red-500 font-bold mb-2 tracking-widest">MASTER</div>
+                        
+                        {# Big Fader #}
+                        <div class="relative w-12 flex-1 bg-[#050505] rounded-full border border-[#222] flex justify-between px-2 py-2 mb-2 shadow-inner">
+                            <div class="w-0.5 h-full bg-[#111] rounded-full"></div>
+                            <div class="w-0.5 h-full bg-[#111] rounded-full"></div>
+                            {# Fader Thumb #}
+                            <div class="absolute left-1 right-1 h-10 bg-gradient-to-b from-[#444] to-[#111] border-y-2 border-red-500/50 rounded-sm shadow-lg cursor-ns-resize flex items-center justify-center" style="bottom: 75%">
+                                <div class="w-6 h-1 bg-red-500/20 rounded-full"></div>
+                            </div>
+                        </div>
+                        
+                        {# Big Meters #}
+                        <div class="w-full flex space-x-1 mt-auto h-12">
+                            <div class="h-full flex-1 bg-[#111] flex flex-col justify-end space-y-px p-px">
+                                {% for j in 1..15 %}
+                                    <div class="w-full h-0.5 {{ j > 13 ? 'bg-red-500' : (j > 10 ? 'bg-yellow-500' : 'bg-green-500') }} opacity-80" {{ j > 12 ? 'style="opacity: 0.1"' : '' }}></div>
+                                {% endfor %}
+                            </div>
+                            <div class="h-full flex-1 bg-[#111] flex flex-col justify-end space-y-px p-px">
+                                {% for j in 1..15 %}
+                                    <div class="w-full h-0.5 {{ j > 13 ? 'bg-red-500' : (j > 10 ? 'bg-yellow-500' : 'bg-green-500') }} opacity-80" {{ j > 11 ? 'style="opacity: 0.1"' : '' }}></div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('turbo:load', () => {
+        const uploadForm = document.getElementById('upload-form');
+        const processBtn = document.getElementById('process-btn');
+        
+        if (uploadForm && processBtn) {
+            uploadForm.addEventListener('submit', () => {
+                const originalText = processBtn.innerHTML;
+                processBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> RENDERING AUDIO...';
+                processBtn.classList.add('opacity-50', 'cursor-wait');
+                processBtn.disabled = true;
+                
+                // Also disable the top REC button
+                const recBtn = document.querySelector('button[form="upload-form"]');
+                if(recBtn) {
+                    recBtn.classList.add('opacity-50');
+                    recBtn.querySelector('i').classList.remove('animate-pulse');
+                }
+            });
+        }
+
+        // --- File Input Visual Updates ---
+        const audioInput = document.getElementById('track_audioFile');
+        const audioStatus = document.getElementById('audio-status');
+        const audioFilename = document.getElementById('audio-filename');
+
+        if(audioInput) {
+            audioInput.addEventListener('change', (e) => {
+                if(e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    audioFilename.textContent = file.name;
+                    audioFilename.classList.add('text-cyan-400');
+                    audioStatus.textContent = 'Loaded';
+                    audioStatus.classList.replace('text-cyan-500', 'text-green-500');
+                }
+            });
+        }
+
+        const imgInput = document.getElementById('track_coverImage');
+        const imgStatus = document.getElementById('img-status');
+        const imgFilename = document.getElementById('img-filename');
+        const coverPreview = document.getElementById('cover-preview');
+
+        if(imgInput) {
+            imgInput.addEventListener('change', (e) => {
+                if(e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    imgFilename.textContent = file.name;
+                    imgFilename.parentElement.classList.add('border-fuchsia-500');
+                    imgStatus.textContent = 'Mapped';
+                    imgStatus.classList.replace('text-fuchsia-500', 'text-green-500');
+
+                    // Show preview
+                    const url = URL.createObjectURL(file);
+                    coverPreview.src = url;
+                    coverPreview.classList.remove('hidden');
+                }
+            });
+        }
+    });
+
+    // Cleanup 3D Background specifically for this page
+    document.addEventListener('turbo:load', () => {
+        const bg = document.getElementById('canvas-container');
+        if (bg) bg.style.display = 'none';
+        const pageMain = document.getElementById('page-main');
+        if (pageMain) pageMain.style.animation = 'none'; // remove base template margin/padding interference
+        const mainNav = document.getElementById('main-nav');
+        if (mainNav) mainNav.style.display = 'none'; // hide normal nav
+    });
+    
+    document.addEventListener('turbo:before-cache', () => {
+        const bg = document.getElementById('canvas-container');
+        if (bg) bg.style.display = 'block';
+        const mainNav = document.getElementById('main-nav');
+        if (mainNav) mainNav.style.display = 'block';
+    });
+</script>
+    </div>
+
+    <!-- COOL DELETE MODAL -->
+    <div id="delete-modal" class="fixed inset-0 z-[500] flex items-center justify-center hidden bg-black/80 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+        <div class="bg-[#111] border border-red-500/30 rounded-2xl p-6 max-w-sm w-full mx-4 transform scale-95 transition-transform duration-300 shadow-[0_0_40px_rgba(239,68,68,0.15)] relative overflow-hidden" id="delete-modal-content">
+            <!-- background glow -->
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-red-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-red-900/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 flex flex-col items-center text-center">
+                <div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center mb-4 text-red-500 animate-pulse">
+                    <i class="fas fa-radiation-alt text-2xl"></i>
+                </div>
+                <h3 class="text-white font-bold text-lg mb-2 tracking-wide font-['Outfit']">Delete Track?</h3>
+                <p class="text-gray-400 text-xs mb-6 px-2 leading-relaxed">This will permanently remove <span id="delete-track-name" class="text-red-400 font-bold"></span> from your studio catalogue. This cannot be undone.</p>
+                
+                <form id="delete-form" method="post" class="w-full flex space-x-3">
+                    <input type="hidden" name="_token" id="delete-token" value="">
+                    <button type="button" onclick="closeDeleteModal()" class="flex-1 py-2 rounded bg-white/5 hover:bg-white/10 text-gray-300 text-[10px] uppercase font-bold tracking-widest transition-colors border border-white/10">CANCEL</button>
+                    <button type="submit" class="flex-1 py-2 rounded bg-red-500 hover:bg-red-600 text-white shadow-[0_0_20px_rgba(239,68,68,0.4)] text-[10px] uppercase font-bold tracking-widest transition-colors border border-red-500/50">OBLITERATE</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function openDeleteModal(actionUrl, token, trackName) {
+        document.getElementById('delete-form').action = actionUrl;
+        document.getElementById('delete-token').value = token;
+        document.getElementById('delete-track-name').textContent = `"${trackName}"`;
+        
+        const modal = document.getElementById('delete-modal');
+        const content = document.getElementById('delete-modal-content');
+        modal.classList.remove('hidden');
+        // trigger reflow
+        void modal.offsetWidth;
+        modal.classList.replace('opacity-0', 'opacity-100');
+        content.classList.replace('scale-95', 'scale-100');
+    }
+
+    function closeDeleteModal() {
+        const modal = document.getElementById('delete-modal');
+        const content = document.getElementById('delete-modal-content');
+        modal.classList.replace('opacity-100', 'opacity-0');
+        content.classList.replace('scale-100', 'scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+</script>
+{% endblock %}

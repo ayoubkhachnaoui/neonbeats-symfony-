@@ -1,0 +1,19 @@
+<div style="background-color: #0f0f0f; color: #e0e0e0; font-family: sans-serif; padding: 40px; text-align: center;">
+    <h1 style="color: #06b6d4; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px;">NeonBeats</h1>
+    
+    <div style="background-color: #1a1a1a; border: 1px solid #333; padding: 30px; border-radius: 8px; max-width: 500px; margin: 0 auto; box-shadow: 0 0 20px rgba(6, 182, 212, 0.1);">
+        <h2 style="font-size: 20px; margin-bottom: 20px;">Verify Your Identity</h2>
+        
+        <p style="color: #999; margin-bottom: 30px;">
+            Welcome to the grid. Please confirm your email address to unlock full access to NeonBeats.
+        </p>
+
+        <a href="{{ signedUrl|raw }}" style="background-color: #d946ef; color: white; text-decoration: none; padding: 12px 24px; border-radius: 4px; font-weight: bold; display: inline-block; box-shadow: 0 0 10px rgba(217, 70, 239, 0.4);">
+            CONFIRM ACCOUNT
+        </a>
+
+        <p style="margin-top: 30px; font-size: 12px; color: #555;">
+            Link expires in {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
+        </p>
+    </div>
+</div>
